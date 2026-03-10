@@ -1,0 +1,45 @@
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+from app.auth.router import auth_router
+from app.auth.exceptions import AuthException
+from app.chat.exceptions import ChatException
+from app.chat.router import chat_router
+
+from app.db.models import metadata
+from app.db.engine import engine
+from fastapi.staticfiles import StaticFiles
+
+metadata.create_all(engine)
+app = FastAPI()
+
+
+@app.exception_handler(AuthException)
+async def app_auth_exception_handler(request: Request, exc: AuthException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+    )
+
+
+@app.exception_handler(ChatException)
+async def app_chat_exception_handler(request: Request, exc: ChatException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+    )
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(auth_router)
+app.include_router(chat_router)
+
+
+app.mount("/", StaticFiles(directory="static"), name="static")

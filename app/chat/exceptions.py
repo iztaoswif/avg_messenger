@@ -1,0 +1,13 @@
+class ChatException(Exception):
+    status_code: int = 400
+    detail = "Unknown error occured"
+
+
+class InappropriateMessageTextError(ChatException):
+    status_code: int = 422
+    detail = "Inappropriate content"
+
+    def __init__(self, detail: str | None = None):
+        if detail is not None:
+            self.detail = detail
+        super().__init__(self.detail)

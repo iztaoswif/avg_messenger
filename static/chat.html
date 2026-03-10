@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat</title>
+    <style>
+        #messages { border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: scroll; }
+        .msg { margin-bottom: 10px; }
+        .timestamp { font-size: 0.7em; color: gray; }
+    </style>
+</head>
+<body>
+
+<h2>Chat</h2>
+
+<div id="messages"></div>
+
+<form id="chatForm">
+    Message: <input type="text" id="msgInput" required>
+    <button type="submit">Send</button>
+</form>
+
+<script src="chat.js"></script>
+
+</body>
+</html>

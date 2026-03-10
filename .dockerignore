@@ -1,0 +1,11 @@
+__pycache__/
+.pytest_cache/
+testing/
+.venv/
+.env
+data
+.gitignore
+.python-version
+delete_db.py
+temp.py
+test.py
