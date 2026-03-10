@@ -13,24 +13,6 @@ def create_message(sender_id: int, content: str) -> None:
     with engine.begin() as conn:
         conn.execute(stmt)
 
-'''
-def fetch_messages(after_id: int):
-    stmt = select(messages).where(messages.c.id > after_id).order_by(messages.c.id.asc())
-
-    result = []
-    with engine.connect() as conn:
-        for row in conn.execute(stmt).mappings():
-            user = get_user_by_id(row["sender_id"])
-            result.append({
-                "id": row["id"],
-                "sender_id": row["sender_id"],
-                "sender_username": user["username"] if user else "unknown",
-                "content": row["content"],
-                "created_at": row["created_at"].isoformat()
-            })
-
-    return result
-'''
 
 def fetch_messages(after_id: int):
     stmt = (
