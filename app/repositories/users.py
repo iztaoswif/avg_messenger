@@ -1,33 +1,52 @@
 from sqlalchemy import (insert,
 select,
 exists)
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.engine import RowMapping
 
-from app.db.engine import engine
+from typing import Optional
+
 from app.db.models import users
 
 
-def is_username_taken(username: str) -> bool:
+async def is_username_taken(
+    session: AsyncSession,
+    username: str) -> bool:
+
     stmt = select(exists().where(users.c.username == username))
 
-    with engine.connect() as conn:
-        return conn.execute(stmt).scalar()
+    result = await session.execute(stmt)
+    return result.scalar()
 
 
-def create_user(username: str, password_hash: str) -> None:
-    stmt = insert(users).values(username=username,
-        password_hash=password_hash)
+async def create_user(
+    session: AsyncSession,
+    username: str,
+    password_hash: str) -> None:
 
-    with engine.begin() as conn:
-        conn.execute(stmt)
+    stmt = insert(users).values(
+        username=username,
+        password_hash=password_hash
+    )
+
+    await session.execute(stmt)
+    await session.commit()
 
 
-def get_user_by_username(username: str):
+async def get_user_by_username(
+    session: AsyncSession,
+    username: str) -> Optional[RowMapping]:
+
     stmt = select(users).where(users.c.username == username).limit(1)
-    with engine.connect() as conn:
-        return conn.execute(stmt).mappings().first()
+
+    result = await session.execute(stmt)
+    return result.mappings().first()
 
 
-def get_user_by_id(id: int):
+async def get_user_by_id(
+    session: AsyncSession,
+    id: int) -> Optional[RowMapping]:
+
     stmt = select(users).where(users.c.id == id).limit(1)
-    with engine.connect() as conn:
-        return conn.execute(stmt).mappings().first()
+    result = await session.execute(stmt)
+    return result.mappings().first()
