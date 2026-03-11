@@ -5,7 +5,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.engine import RowMapping
 
 from typing import Optional
-
 from app.db.models import users
 
 
@@ -48,5 +47,6 @@ async def get_user_by_id(
     id: int) -> Optional[RowMapping]:
 
     stmt = select(users).where(users.c.id == id).limit(1)
+
     result = await session.execute(stmt)
     return result.mappings().first()

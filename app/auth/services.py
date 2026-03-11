@@ -1,3 +1,4 @@
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.repositories.users import (create_user,
 get_user_by_username,
 is_username_taken)
@@ -7,18 +8,30 @@ from app.core.passwords import get_password_hash, is_password_correct
 from app.core.token import create_access_token
 
 
-def register_user(username: str, password: str) -> None:
-    if is_username_taken(username):
+async def register_user(
+    session: AsyncSession,
+    username: str,
+    password: str) -> None:
+
+    is_username_taken_result = await is_username_taken(session, username)
+    if is_username_taken_result:
         raise UsernameTakenError()
 
-    password_hash = get_password_hash(password)
-    create_user(username, password_hash)
+    password_hash = await get_password_hash(password)
+    await create_user(session, username, password_hash)
 
 
-def login_user(username: str, password: str) -> str:
-    user = get_user_by_username(username)
+async def login_user(
+    session: AsyncSession,
+    username: str,
+    password: str) -> str:
 
-    if user is None or not is_password_correct(password, user["password_hash"]):
+    user = await get_user_by_username(session, username)
+    if user is None:
+        raise InvalidCredentialsError()
+
+    is_password_correct_result = await is_password_correct(password, user["password_hash"])
+    if not is_password_correct_result:
         raise InvalidCredentialsError()
 
     token = create_access_token({"sub": str(user["id"])})

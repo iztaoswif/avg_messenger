@@ -1,6 +1,7 @@
 from pydantic import BaseModel, field_validator
 from app.core.config import MAX_TEXT_LENGTH
 from app.chat.exceptions import InappropriateMessageTextError
+from typing import List
 
 
 def validate_message_text(text: str) -> str:
@@ -34,3 +35,15 @@ class SendTextMessageRequest(BaseModel):
 
 class SendTextMessageResponse(BaseModel):
     message: str
+
+
+class ResponseMessage(BaseModel):
+    id: int
+    sender_id: int
+    sender_username: str
+    content: str
+    created_at: str
+
+
+class GetMessagesResponse(BaseModel):
+    messages: List[ResponseMessage]

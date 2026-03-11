@@ -3,7 +3,6 @@ select)
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from typing import List, Dict
-
 from app.db.models import messages, users
 
 
