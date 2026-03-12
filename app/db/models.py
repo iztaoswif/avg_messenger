@@ -19,13 +19,13 @@ users = Table(
         Integer, primary_key=True),
     Column(
         "username",
-        Text,
+        String(30),
         nullable=False,
         unique=True,
         index=True),
     Column(
         "password_hash",
-        String,
+        String(200),
         nullable=False)
 )
 
@@ -45,7 +45,7 @@ messages = Table(
         index=True),
     Column(
         "content",
-        Text,
+        String(1024),
         nullable=False),
     Column(
         "created_at",
