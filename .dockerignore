@@ -1,11 +1,12 @@
 __pycache__/
 .pytest_cache/
-testing/
+.ruff_cache/
+tests/
 .venv/
+*.pyc
 .env
-data
+.git
 .gitignore
 .python-version
-delete_db.py
-temp.py
-test.py
+README.md
+test-requirements.txt

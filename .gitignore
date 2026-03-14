@@ -5,12 +5,14 @@ build/
 dist/
 wheels/
 *.egg-info
-testing/
+tests/
 data/
 .pytest_cache/
+.ruff_cache/
 
 delete_db.py
 
 # Virtual environments
 .venv
 .env
+.env.docker
