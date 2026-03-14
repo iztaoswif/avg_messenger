@@ -23,7 +23,7 @@ async def register(
 
     await register_user(session, username, password)
 
-    return MessageResponse(message="successful register")
+    return MessageResponse(message="Successful register")
 
 
 @auth_router.post("/login", response_model=TokenResponse)

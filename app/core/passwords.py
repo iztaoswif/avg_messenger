@@ -1,26 +1,17 @@
-import asyncio
-from passlib.context import CryptContext
+from asyncio import to_thread
+from argon2 import PasswordHasher
 
-password_context = CryptContext(schemes=["argon2"])
+ph = PasswordHasher()
 
-async def get_password_hash(
-    password: str) -> str:
-
-    password_hash = await asyncio.to_thread(
-        password_context.hash,
-        password
-    )
-    return password_hash
-    
+async def get_password_hash(password: str) -> str:
+    return await to_thread(ph.hash, password)
 
 
 async def is_password_correct(
-    plain_password: str,
-    password_hash: str) -> bool:
+    password_hash: str,
+    plain_password: str) -> bool:
 
-    is_correct = await asyncio.to_thread(
-        password_context.verify,
-        plain_password,
-        password_hash
-    )
-    return is_correct
+    try:
+        return await to_thread(ph.verify, password_hash, plain_password)
+    except Exception:
+        return False

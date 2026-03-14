@@ -30,7 +30,7 @@ async def login_user(
     if user is None:
         raise InvalidCredentialsError()
 
-    is_password_correct_result = await is_password_correct(password, user["password_hash"])
+    is_password_correct_result = await is_password_correct(user["password_hash"], password)
     if not is_password_correct_result:
         raise InvalidCredentialsError()
 
