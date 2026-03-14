@@ -32,7 +32,7 @@ async def send(
 @chat_router.get("/messages")
 async def get_messages(
     after_id: int = 0,
-    session: AsyncSession = Depends(get_asyncsession)) -> List[Dict]:
+    session: AsyncSession = Depends(get_asyncsession)) -> GetMessagesResponse:
 
     messages = await fetch_messages(session, after_id)
 

@@ -41,7 +41,8 @@ async function fetchMessages() {
         return;
     }
 
-    const messages = await res.json();
+    const data = await res.json();
+    const messages = data.messages;
     const container = document.getElementById('messages');
 
     messages.forEach(msg => {
