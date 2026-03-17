@@ -1,0 +1,14 @@
+pytest
+pytest-asyncio
+httpx
+aiosqlite
+fastapi
+sqlalchemy
+asyncpg
+argon2-cffi
+python-jose
+python-dotenv
+python-multipart
+uvicorn
+alembic
+psycopg2

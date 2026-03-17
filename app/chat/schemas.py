@@ -1,6 +1,9 @@
 from pydantic import BaseModel, field_validator
 from app.core.config import MAX_TEXT_LENGTH
-from app.chat.exceptions import InappropriateMessageTextError
+from app.chat.exceptions import (
+    InappropriateMessageTextError,
+    InappropriateChatIdError
+)
 from typing import List
 
 
@@ -24,7 +27,16 @@ def validate_message_text(text: str) -> str:
 
 
 class SendTextMessageRequest(BaseModel):
+    chat_id: int
     content: str
+
+    @field_validator("chat_id")
+    @classmethod
+    def validate_chat_id(cls, chat_id: int) -> int:
+        if chat_id < 1:
+            raise InappropriateChatIdError
+
+        return chat_id
 
     @field_validator("content")
     @classmethod

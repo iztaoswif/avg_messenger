@@ -9,16 +9,12 @@ from app.auth.router import auth_router
 from app.auth.exceptions import AuthException
 from app.chat.exceptions import ChatException
 from app.chat.router import chat_router
-from app.db.models import metadata
-from app.db.engine import engine
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    async with engine.begin() as conn:
-        await conn.run_sync(metadata.create_all)
-
     yield
+
 
 app = FastAPI(lifespan=lifespan)
 

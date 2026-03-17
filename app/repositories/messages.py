@@ -1,17 +1,21 @@
-from sqlalchemy import (insert,
-select)
+from sqlalchemy import (
+    insert,
+    select,
+    exists
+)
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from typing import List, Dict
-from app.db.models import messages, users
+from app.db.models import messages, users, chats
 
 
-async def create_message(
+async def create_message_in_db(
     session: AsyncSession,
     sender_id: int,
+    chat_id: int,
     content: str) -> None:
 
     stmt = insert(messages).values(
+        chat_id=chat_id,
         sender_id=sender_id,
         content=content
     )
@@ -20,8 +24,9 @@ async def create_message(
     await session.commit()
 
 
-async def fetch_messages(
+async def get_messages_from_db(
     session: AsyncSession,
+    chat_id: int,
     after_id: int) -> List[Dict]:
 
     stmt = (
@@ -33,6 +38,7 @@ async def fetch_messages(
             users.c.username.label("sender_username")
         )
         .join(users, messages.c.sender_id == users.c.id)
+        .where(messages.c.chat_id == chat_id)
         .where(messages.c.id > after_id)
         .order_by(messages.c.id.asc())
     )
@@ -49,3 +55,23 @@ async def fetch_messages(
 
         for row in result.mappings()
     ]
+
+
+async def is_chat_exists(
+    session: AsyncSession,
+    chat_id: int) -> bool:
+
+    stmt = select(exists().where(chats.c.id == chat_id))
+
+    result = await session.execute(stmt)
+    return result.scalar()
+
+
+async def is_id_exists(
+    session: AsyncSession,
+    id: int) -> bool:
+
+    stmt = select(exists().where(chats.c.id == id))
+
+    result = await session.execute(stmt)
+    return result.scalar()

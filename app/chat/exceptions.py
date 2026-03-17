@@ -11,3 +11,13 @@ class InappropriateMessageTextError(ChatException):
         if detail is not None:
             self.detail = detail
         super().__init__(self.detail)
+
+
+class InappropriateChatIdError(ChatException):
+    status_code: int = 422
+    detail = "Inappropriate chat id"
+
+
+class InappropriateIdError(ChatException):
+    status_code: int = 422
+    detail = "Inappropriate id"

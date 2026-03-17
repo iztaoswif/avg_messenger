@@ -6,6 +6,9 @@ if (!token) {
     window.location.href = "auth.html";
 }
 
+const urlParams = new URLSearchParams(window.location.search);
+const chatId = urlParams.get('chat_id') || 1;
+
 let lastMessageId = 0;
 
 document.getElementById('chatForm').onsubmit = async (e) => {
@@ -13,13 +16,13 @@ document.getElementById('chatForm').onsubmit = async (e) => {
 
     const content = document.getElementById('msgInput').value;
 
-    const res = await fetch('/chat/send', {
+    const res = await fetch("/chat/send", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ content })
+        body: JSON.stringify({ chat_id: parseInt(chatId), content: content })
     });
 
     const data = await res.json();
@@ -30,7 +33,7 @@ document.getElementById('chatForm').onsubmit = async (e) => {
 
 async function fetchMessages() {
 
-    const res = await fetch(`/chat/messages?after_id=${lastMessageId}`, {
+    const res = await fetch(`/chat/messages?after_id=${lastMessageId}&chat_id=${chatId}`, {
         headers: {
             'Authorization': `Bearer ${token}`
         }

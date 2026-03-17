@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends
 
-from typing import List, Dict
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.dependencies import get_asyncsession
 from app.chat.schemas import (
@@ -9,8 +8,10 @@ from app.chat.schemas import (
     GetMessagesResponse)
 
 from app.auth.dependencies import get_current_user_id
-from app.repositories.messages import (fetch_messages,
-create_message)
+from app.repositories.messages import (
+    create_message_in_db
+)
+from app.chat.services import fetch_messages
 
 chat_router = APIRouter(prefix="/chat",
 tags=["Chat"])
@@ -22,18 +23,19 @@ async def send(
     sender_id: int = Depends(get_current_user_id),
     session: AsyncSession = Depends(get_asyncsession)) -> SendTextMessageResponse:
 
-    content = request.content
+    chat_id, content = request.chat_id, request.content
 
-    await create_message(session, sender_id, content)
+    await create_message_in_db(session, sender_id, chat_id, content)
 
     return SendTextMessageResponse(message="Message sent successfully")
 
 
 @chat_router.get("/messages")
 async def get_messages(
+    chat_id: int,
     after_id: int = 0,
     session: AsyncSession = Depends(get_asyncsession)) -> GetMessagesResponse:
 
-    messages = await fetch_messages(session, after_id)
+    messages = await fetch_messages(session, chat_id, after_id)
 
     return GetMessagesResponse(messages=messages)
