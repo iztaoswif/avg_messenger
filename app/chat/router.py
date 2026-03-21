@@ -12,9 +12,6 @@ from app.chat.schemas import (
     GenericMessageResponse
 )
 from app.auth.dependencies import get_current_user_id
-from app.repositories.messages import (
-    insert_message
-)
 from app.repositories.chats import (
     insert_chat,
     select_chats
