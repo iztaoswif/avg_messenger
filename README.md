@@ -7,7 +7,7 @@ Stack:
 -SQLAlchemy Core (async)
 -PostgreSQL
 -Alembic (for DB migrations)
--JWT
+-JWT (python-jose)
 -Docker / Docker compose
 
 
