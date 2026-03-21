@@ -1,34 +1,33 @@
 from contextlib import asynccontextmanager
-
+from redis.asyncio import Redis
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-
 from app.auth.router import auth_router
-from app.auth.exceptions import AuthException
-from app.chat.exceptions import ChatException
+from app.core.exceptions import AppException
 from app.chat.router import chat_router
 
 
+redis_client = None
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    global redis_client
+    redis_client = Redis(
+        host="localhost",
+        port=6379,
+        decode_responses=True,
+        max_connections=30
+    )
     yield
-
+    await redis_client.aclose()
 
 app = FastAPI(lifespan=lifespan)
 
 
-@app.exception_handler(AuthException)
-async def app_auth_exception_handler(request: Request, exc: AuthException):
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={"detail": exc.detail},
-    )
-
-
-@app.exception_handler(ChatException)
-async def app_chat_exception_handler(request: Request, exc: ChatException):
+@app.exception_handler(AppException)
+async def app_auth_exception_handler(request: Request, exc: AppException):
     return JSONResponse(
         status_code=exc.status_code,
         content={"detail": exc.detail},

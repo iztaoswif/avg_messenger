@@ -1,7 +1,8 @@
+from redis.asyncio import Redis
 from fastapi import APIRouter, Depends
 from typing import Annotated
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.dependencies import get_asyncsession
+from app.db.dependencies import get_asyncsession, get_redis
 from app.chat.schemas import (
     SendTextMessageRequest,
     GetMessagesResponse,
@@ -10,7 +11,6 @@ from app.chat.schemas import (
     JoinChatRequest,
     GenericMessageResponse
 )
-
 from app.auth.dependencies import get_current_user_id
 from app.repositories.messages import (
     insert_message
@@ -22,24 +22,34 @@ from app.repositories.chats import (
 from app.repositories.chat_members import (
     insert_chat_member,
 )
-from app.chat.services import fetch_messages, add_member_to_chat
-
+from app.chat.services import (
+    fetch_messages,
+    add_member_to_chat,
+    create_new_message
+)
 SessionDep = Annotated[AsyncSession, Depends(get_asyncsession)]
 UserIdDep = Annotated[int, Depends(get_current_user_id)]
+RedisDep = Annotated[Redis, Depends(get_redis)]
 
 chat_router = APIRouter(prefix="/chat",
 tags=["Chat"])
 
 
 @chat_router.post("/send")
-async def send(
+async def send_message(
     request: SendTextMessageRequest,
     sender_id: UserIdDep,
+    redis_client: RedisDep,
     session: SessionDep) -> GenericMessageResponse:
 
     chat_id, content = request.chat_id, request.content
 
-    await insert_message(session, sender_id, chat_id, content)
+    await create_new_message(
+        session,
+        redis_client,
+        sender_id,
+        chat_id,
+        content)
 
     return GenericMessageResponse(message="Message sent successfully")
 

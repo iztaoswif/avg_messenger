@@ -1,4 +1,7 @@
-class AuthException(Exception):
+from app.core.exceptions import AppException
+
+
+class AuthException(AppException):
     status_code: int = 400
     detail = "Error during auth process"
 
@@ -46,4 +49,3 @@ class InvalidTokenError(AuthException):
 class ForbiddenError(AuthException):
     status_code = 403
     detail = "Forbidden"
-

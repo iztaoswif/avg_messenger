@@ -12,3 +12,5 @@ python-multipart
 uvicorn
 alembic
 psycopg2
+redis
+hiredis

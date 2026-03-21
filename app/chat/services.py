@@ -1,3 +1,4 @@
+from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 from app.chat.exceptions import (
@@ -5,7 +6,8 @@ from app.chat.exceptions import (
     InappropriateIdError
 )
 from app.repositories.messages import (
-    select_messages
+    select_messages,
+    insert_message
 )
 from app.repositories.chats import (
     is_chat_exists,
@@ -13,6 +15,8 @@ from app.repositories.chats import (
 )
 from app.repositories.chat_members import insert_chat_member
 from app.chat.exceptions import AlreadyChatMemberError
+from app.core.exceptions import RateLimitedError
+from app.core.rate_limit import is_rate_limited
 
 
 async def fetch_messages(
@@ -41,3 +45,21 @@ async def add_member_to_chat(
     except IntegrityError:
         await session.rollback()
         raise AlreadyChatMemberError()
+
+
+async def create_new_message(
+    session: AsyncSession,
+    redis_client: Redis,
+    sender_id: int,
+    chat_id: int,
+    content: str) -> None:
+
+    if await is_rate_limited(redis_client, sender_id):
+        raise RateLimitedError()
+
+    await insert_message(
+        session,
+        sender_id,
+        chat_id,
+        content
+    )

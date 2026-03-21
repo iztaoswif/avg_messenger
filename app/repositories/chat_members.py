@@ -5,7 +5,6 @@ from sqlalchemy import (
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models import chat_members
-from typing import List, Dict
 
 
 async def insert_chat_member(
