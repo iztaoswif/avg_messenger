@@ -45,3 +45,5 @@ Tests are isolated using database transactions.
 -Redis caching
 -Pagination limits
 -First deployment (using GitHub Render)
+
+<img width="1625" height="672" alt="image" src="https://github.com/user-attachments/assets/bb809de3-2be3-49f8-9d12-4870fa5235ed" />
