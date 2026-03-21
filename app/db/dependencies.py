@@ -1,7 +1,7 @@
 from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from app.db.engine import engine
-from app.main import redis_client
+from app.core.redis import redis_client
 from redis.asyncio import Redis
 
 async_session = async_sessionmaker(engine, expire_on_commit=False)
