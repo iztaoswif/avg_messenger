@@ -13,6 +13,11 @@ class InappropriateMessageTextError(ChatException):
         super().__init__(self.detail)
 
 
+class InappropriateChatNameError(ChatException):
+    status_code: int = 422
+    detail = "Inappropriate chat name"
+
+
 class InappropriateChatIdError(ChatException):
     status_code: int = 422
     detail = "Inappropriate chat id"
@@ -21,3 +26,8 @@ class InappropriateChatIdError(ChatException):
 class InappropriateIdError(ChatException):
     status_code: int = 422
     detail = "Inappropriate id"
+
+
+class AlreadyChatMemberError(ChatException):
+    status_code: int = 409
+    detail = "The user is already a member of the given chat"

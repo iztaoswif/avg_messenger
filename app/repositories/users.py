@@ -18,7 +18,7 @@ async def is_username_taken(
     return result.scalar()
 
 
-async def create_user(
+async def insert_user(
     session: AsyncSession,
     username: str,
     password_hash: str) -> None:
@@ -32,7 +32,7 @@ async def create_user(
     await session.commit()
 
 
-async def get_user_by_username(
+async def select_user_by_username(
     session: AsyncSession,
     username: str) -> Optional[RowMapping]:
 
@@ -42,7 +42,7 @@ async def get_user_by_username(
     return result.mappings().first()
 
 
-async def get_user_by_id(
+async def select_user_by_id(
     session: AsyncSession,
     id: int) -> Optional[RowMapping]:
 

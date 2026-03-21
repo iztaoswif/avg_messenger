@@ -27,7 +27,7 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
 
-    op.execute("INSERT INTO chats (id, name) VALUES (1, 'Origin')")
+    op.execute("INSERT INTO chats (name) VALUES ('Origin')")
 
     op.create_table('chat_members',
     sa.Column('chat_id', sa.Integer(), nullable=False),

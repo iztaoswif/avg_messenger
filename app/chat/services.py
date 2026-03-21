@@ -1,13 +1,18 @@
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import IntegrityError
 from app.chat.exceptions import (
     InappropriateChatIdError,
     InappropriateIdError
 )
 from app.repositories.messages import (
-    is_chat_exists,
-    is_id_exists,
-    get_messages_from_db
+    select_messages
 )
+from app.repositories.chats import (
+    is_chat_exists,
+    is_chat_id_exists
+)
+from app.repositories.chat_members import insert_chat_member
+from app.chat.exceptions import AlreadyChatMemberError
 
 
 async def fetch_messages(
@@ -18,8 +23,21 @@ async def fetch_messages(
     if not await is_chat_exists(session, chat_id):
         raise InappropriateChatIdError()
 
-    if not await is_id_exists(session, chat_id):
+    if not await is_chat_id_exists(session, chat_id):
         raise InappropriateIdError()
 
-    messages = await get_messages_from_db(session, chat_id, after_id)
+    messages = await select_messages(session, chat_id, after_id)
     return messages
+
+
+async def add_member_to_chat(
+    session: AsyncSession,
+    chat_id: int,
+    user_id: int) -> None:
+
+    try:
+        await insert_chat_member(session, chat_id, user_id)
+
+    except IntegrityError:
+        await session.rollback()
+        raise AlreadyChatMemberError()

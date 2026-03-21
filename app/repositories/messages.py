@@ -1,14 +1,13 @@
 from sqlalchemy import (
     insert,
     select,
-    exists
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Dict
-from app.db.models import messages, users, chats
+from app.db.models import messages, users
 
 
-async def create_message_in_db(
+async def insert_message(
     session: AsyncSession,
     sender_id: int,
     chat_id: int,
@@ -24,7 +23,7 @@ async def create_message_in_db(
     await session.commit()
 
 
-async def get_messages_from_db(
+async def select_messages(
     session: AsyncSession,
     chat_id: int,
     after_id: int) -> List[Dict]:
@@ -55,23 +54,3 @@ async def get_messages_from_db(
 
         for row in result.mappings()
     ]
-
-
-async def is_chat_exists(
-    session: AsyncSession,
-    chat_id: int) -> bool:
-
-    stmt = select(exists().where(chats.c.id == chat_id))
-
-    result = await session.execute(stmt)
-    return result.scalar()
-
-
-async def is_id_exists(
-    session: AsyncSession,
-    id: int) -> bool:
-
-    stmt = select(exists().where(chats.c.id == id))
-
-    result = await session.execute(stmt)
-    return result.scalar()

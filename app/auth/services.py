@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.repositories.users import (create_user,
-get_user_by_username,
+from app.repositories.users import (insert_user,
+select_user_by_username,
 is_username_taken)
 
 from app.auth.exceptions import UsernameTakenError, InvalidCredentialsError
@@ -18,7 +18,7 @@ async def register_user(
         raise UsernameTakenError()
 
     password_hash = await get_password_hash(password)
-    await create_user(session, username, password_hash)
+    await insert_user(session, username, password_hash)
 
 
 async def login_user(
@@ -26,7 +26,7 @@ async def login_user(
     username: str,
     password: str) -> str:
 
-    user = await get_user_by_username(session, username)
+    user = await select_user_by_username(session, username)
     if user is None:
         raise InvalidCredentialsError()
 
