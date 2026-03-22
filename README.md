@@ -42,7 +42,6 @@ Tests are isolated using database transactions.
 
 #TODO
 -Websockets support
--Redis caching
 -Pagination limits
 -First deployment (using GitHub Render)
 
