@@ -6,3 +6,6 @@ python-jose
 python-dotenv
 python-multipart
 uvicorn
+alembic
+redis
+hiredis
