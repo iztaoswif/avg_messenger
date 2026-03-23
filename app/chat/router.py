@@ -78,7 +78,7 @@ async def get_chats_list(
 async def create_chat(
     request: CreateChatRequest,
     creator_id: UserIdDep,
-    session: SessionDep) -> GenericMessageResponse:
+    session: SessionDep) -> CreateChatResponse:
 
     name = request.name
 
