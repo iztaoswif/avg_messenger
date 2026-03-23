@@ -4,13 +4,12 @@ httpx
 aiosqlite
 fastapi
 sqlalchemy
-asyncpg
+psycopg
 argon2-cffi
 python-jose
 python-dotenv
 python-multipart
 uvicorn
 alembic
-psycopg2
 redis
 hiredis
