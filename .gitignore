@@ -9,7 +9,7 @@ data/
 .pytest_cache/
 .ruff_cache/
 
-delete_db.py
+test_data.txt
 *.sql
 test.db
 
