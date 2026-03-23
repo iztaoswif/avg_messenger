@@ -1,9 +1,11 @@
 from redis.asyncio import Redis
+from app.core.exceptions import RateLimitedError
+from app.core.rate_limit import is_rate_limited
+from app.core.dependencies import get_redis
 from fastapi import APIRouter, Depends
 from typing import Annotated
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.dependencies import get_asyncsession
-from app.core.dependencies import get_redis
 from app.chat.schemas import (
     SendTextMessageRequest,
     GetMessagesResponse,
@@ -35,10 +37,13 @@ tags=["Chat"])
 async def send_message(
     request: SendTextMessageRequest,
     sender_id: UserIdDep,
-    redis_client: RedisDep,
-    session: SessionDep) -> GenericMessageResponse:
+    session: SessionDep,
+    redis_client: RedisDep) -> GenericMessageResponse:
 
     chat_id, content = request.chat_id, request.content
+
+    if await is_rate_limited(redis_client, f"sender_id:{sender_id}"):
+        raise RateLimitedError()
 
     await create_new_message(
         session,
@@ -102,5 +107,5 @@ async def join_chat(
     await add_member_to_chat(session, chat_id, user_id)
 
     await session.commit()
-    
+
     return GenericMessageResponse(message="Successful chat join")
