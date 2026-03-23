@@ -55,6 +55,7 @@ async def send_message(
 async def get_messages(
     chat_id: int,
     after_id: int,
+    user_id: UserIdDep,
     session: SessionDep) -> GetMessagesResponse:
 
     messages = await fetch_messages(session, chat_id, after_id)
