@@ -23,6 +23,8 @@ async def register(
 
     await register_user(session, username, password)
 
+    await session.commit()
+
     return MessageResponse(message="Successful register")
 
 
