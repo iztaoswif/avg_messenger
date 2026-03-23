@@ -10,6 +10,7 @@ from app.repositories.messages import (
     insert_message
 )
 from app.repositories.chats import (
+    insert_chat,
     is_chat_exists,
     is_chat_id_exists
 )
@@ -47,6 +48,17 @@ async def add_member_to_chat(
         raise AlreadyChatMemberError()
 
 
+async def add_new_chat(
+    session: AsyncSession,
+    name: str,
+    creator_id: int) -> int:
+
+    new_chat_id = await insert_chat(session, name)
+    await insert_chat_member(session, new_chat_id, creator_id)
+
+    return new_chat_id
+
+
 async def create_new_message(
     session: AsyncSession,
     redis_client: Redis,
@@ -54,7 +66,7 @@ async def create_new_message(
     chat_id: int,
     content: str) -> None:
 
-    if await is_rate_limited(redis_client, sender_id):
+    if await is_rate_limited(redis_client, f"sender_id:{sender_id}"):
         raise RateLimitedError()
 
     await insert_message(

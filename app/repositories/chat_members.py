@@ -18,7 +18,6 @@ async def insert_chat_member(
     )
 
     await session.execute(stmt)
-    await session.commit()
 
 
 async def is_chat_member(

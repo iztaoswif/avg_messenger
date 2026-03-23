@@ -29,7 +29,6 @@ async def insert_user(
     )
 
     await session.execute(stmt)
-    await session.commit()
 
 
 async def select_user_by_username(

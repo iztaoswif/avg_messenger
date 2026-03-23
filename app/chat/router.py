@@ -15,16 +15,13 @@ from app.chat.schemas import (
 )
 from app.auth.dependencies import get_current_user_id
 from app.repositories.chats import (
-    insert_chat,
     select_chats
-)
-from app.repositories.chat_members import (
-    insert_chat_member,
 )
 from app.chat.services import (
     fetch_messages,
     add_member_to_chat,
-    create_new_message
+    create_new_message,
+    add_new_chat
 )
 SessionDep = Annotated[AsyncSession, Depends(get_asyncsession)]
 UserIdDep = Annotated[int, Depends(get_current_user_id)]
@@ -49,6 +46,8 @@ async def send_message(
         sender_id,
         chat_id,
         content)
+
+    await session.commit()
 
     return GenericMessageResponse(message="Message sent successfully")
 
@@ -82,8 +81,9 @@ async def create_chat(
 
     name = request.name
 
-    new_chat_id = await insert_chat(session, name)
-    await insert_chat_member(session, new_chat_id, creator_id)
+    new_chat_id = await add_new_chat(session, name, creator_id)
+
+    await session.commit()
 
     return CreateChatResponse(
         id=new_chat_id,
@@ -100,4 +100,7 @@ async def join_chat(
     chat_id = request.chat_id
 
     await add_member_to_chat(session, chat_id, user_id)
+
+    await session.commit()
+    
     return GenericMessageResponse(message="Successful chat join")

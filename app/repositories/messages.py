@@ -20,7 +20,6 @@ async def insert_message(
     )
 
     await session.execute(stmt)
-    await session.commit()
 
 
 async def select_messages(

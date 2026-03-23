@@ -14,8 +14,7 @@ async def insert_chat(
 
     stmt = insert(chats).values(name=name).returning(chats.c.id)
     result = await session.execute(stmt)
-    await session.commit()
-    return result.scalar()
+    return result.scalar_one()
 
 
 async def select_chats(
