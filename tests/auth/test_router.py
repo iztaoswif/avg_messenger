@@ -11,6 +11,7 @@ async def register(
         "password": password
     })
 
+
 async def login(
     client: AsyncClient,
     username: str = "testuser",
@@ -21,12 +22,14 @@ async def login(
         "password": password
     })
 
+
 def assert_exception_response(
     response,
     predicted_exc: auth_exc.AuthException) -> None:
 
     assert response.status_code == predicted_exc.status_code
     assert response.json()["detail"] == predicted_exc.detail
+
 
 def assert_successful_response(
     response,
