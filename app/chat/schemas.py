@@ -85,6 +85,11 @@ class CreateChatRequest(BaseModel):
         return chat_name
 
 
+class CreateChatResponse(BaseModel):
+    id: int
+    name: str
+
+
 class Chat(BaseModel):
     id: int = Field(ge=1)
     name: str

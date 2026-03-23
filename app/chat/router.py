@@ -8,6 +8,7 @@ from app.chat.schemas import (
     SendTextMessageRequest,
     GetMessagesResponse,
     CreateChatRequest,
+    CreateChatResponse,
     GetChatsResponse,
     JoinChatRequest,
     GenericMessageResponse
@@ -83,7 +84,11 @@ async def create_chat(
 
     new_chat_id = await insert_chat(session, name)
     await insert_chat_member(session, new_chat_id, creator_id)
-    return GenericMessageResponse(message="Successful chat creation")
+
+    return CreateChatResponse(
+        id=new_chat_id,
+        name=name
+    )
 
 
 @chat_router.post("/join")
