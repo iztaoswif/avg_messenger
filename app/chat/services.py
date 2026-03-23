@@ -16,8 +16,6 @@ from app.repositories.chats import (
 )
 from app.repositories.chat_members import insert_chat_member
 from app.chat.exceptions import AlreadyChatMemberError
-from app.core.exceptions import RateLimitedError
-from app.core.rate_limit import is_rate_limited
 
 
 async def fetch_messages(
@@ -65,9 +63,6 @@ async def create_new_message(
     sender_id: int,
     chat_id: int,
     content: str) -> None:
-
-    if await is_rate_limited(redis_client, f"sender_id:{sender_id}"):
-        raise RateLimitedError()
 
     await insert_message(
         session,

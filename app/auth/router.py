@@ -25,7 +25,7 @@ async def register(
 
     username, password = request.username, request.password
 
-    if is_rate_limited(redis_client, f"register_username:{username}"):
+    if await is_rate_limited(redis_client, f"register_username:{username}"):
         raise RateLimitedError
 
     await register_user(session, username, password)
@@ -43,7 +43,7 @@ async def login(
 
     username, password = form.username, form.password
 
-    if is_rate_limited(redis_client, f"login_username:{username}"):
+    if await is_rate_limited(redis_client, f"login_username:{username}"):
         raise RateLimitedError
 
     token = await login_user(session, username, password)
