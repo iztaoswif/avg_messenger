@@ -10,3 +10,4 @@ tests/
 .python-version
 README.md
 test-requirements.txt
+*.sql
