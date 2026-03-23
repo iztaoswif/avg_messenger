@@ -2,7 +2,8 @@ from redis.asyncio import Redis
 from fastapi import APIRouter, Depends
 from typing import Annotated
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.dependencies import get_asyncsession, get_redis
+from app.db.dependencies import get_asyncsession
+from app.core.dependencies import get_redis
 from app.chat.schemas import (
     SendTextMessageRequest,
     GetMessagesResponse,

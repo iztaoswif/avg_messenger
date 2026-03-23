@@ -7,14 +7,11 @@ from fastapi.staticfiles import StaticFiles
 from app.auth.router import auth_router
 from app.core.exceptions import AppException
 from app.chat.router import chat_router
-from app.core.redis import redis_client
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global redis_client
     yield
-    await redis_client.aclose()
 
 app = FastAPI(lifespan=lifespan)
 
