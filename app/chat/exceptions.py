@@ -1,5 +1,6 @@
 from app.core.exceptions import AppException
 
+
 class ChatException(AppException):
     status_code: int = 400
     detail = "Unknown error occured"

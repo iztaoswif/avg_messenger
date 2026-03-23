@@ -77,7 +77,7 @@ def test_allow_valid_usernames():
 #password related tests
 
 
-def test_disallow_short_passwords():
+def test_disallow_exceedingly_short_passwords():
     invalid_passwords = [
         "",
         "a",
@@ -95,7 +95,7 @@ def test_disallow_short_passwords():
         assert("at least 8" in str(password_error.value))
 
 
-def test_disallow_long_passwords():
+def test_disallow_exceedingly_long_passwords():
     invalid_passwords = [
         'a' * (MAX_PASSWORD_LENGTH + 1),
         'cdsfsfsd' * 999

@@ -20,13 +20,17 @@ def validate_message_text(text: str) -> str:
         raise InappropriateMessageTextError(f"Text must be at most {MAX_TEXT_LENGTH} characters long")
 
     if len(text) == 0:
-        raise InappropriateMessageTextError("Text has no printable characters")
+        raise InappropriateMessageTextError("Text is empty")
 
+    sanitized_text = ""
     for char in text:
-        if not (32 <= ord(char) <= 126 or 1040 <= ord(char) <= 1103):
-            raise InappropriateMessageTextError("Illegal characters in the message")
+        if 32 <= ord(char) <= 126 or 1040 <= ord(char) <= 1103:
+            sanitized_text += char
 
-    return text
+    if len(sanitized_text) == 0:
+        raise InappropriateMessageTextError("Text has no valid characters")
+
+    return sanitized_text
 
 
 class SendTextMessageRequest(BaseModel):
