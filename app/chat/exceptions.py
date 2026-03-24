@@ -34,3 +34,8 @@ class InappropriateIdError(ChatException):
 class AlreadyChatMemberError(ChatException):
     status_code: int = 409
     detail = "The user is already a member of the given chat"
+
+
+class ChatNotFoundError(ChatException):
+    status_code: int = 404
+    detail = "Chat not found"

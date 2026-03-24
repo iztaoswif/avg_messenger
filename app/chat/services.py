@@ -3,7 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 from app.chat.exceptions import (
     InappropriateChatIdError,
-    InappropriateIdError
+    InappropriateIdError,
+    ChatNotFoundError
 )
 from app.repositories.messages import (
     select_messages,
@@ -12,7 +13,8 @@ from app.repositories.messages import (
 from app.repositories.chats import (
     insert_chat,
     is_chat_exists,
-    is_chat_id_exists
+    is_chat_id_exists,
+    select_chat_name_by_id
 )
 from app.repositories.chat_members import insert_chat_member
 from app.chat.exceptions import AlreadyChatMemberError
@@ -70,3 +72,16 @@ async def create_new_message(
         chat_id,
         content
     )
+
+
+async def fetch_chat_name_by_id(
+    session: AsyncSession,
+    id: int) -> str:
+
+    chat_name = await select_chat_name_by_id(session, id)
+
+    if chat_name is None:
+        raise ChatNotFoundError()
+
+    return chat_name
+

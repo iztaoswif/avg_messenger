@@ -12,19 +12,22 @@ from app.chat.schemas import (
     CreateChatRequest,
     CreateChatResponse,
     GetChatsResponse,
+    GetChatResponse,
     JoinChatRequest,
     GenericMessageResponse
 )
 from app.auth.dependencies import get_current_user_id
 from app.repositories.chats import (
-    select_chats
+    select_chats_by_user_id
 )
 from app.chat.services import (
     fetch_messages,
     add_member_to_chat,
     create_new_message,
-    add_new_chat
+    add_new_chat,
+    fetch_chat_name_by_id
 )
+
 SessionDep = Annotated[AsyncSession, Depends(get_asyncsession)]
 UserIdDep = Annotated[int, Depends(get_current_user_id)]
 RedisDep = Annotated[Redis, Depends(get_redis)]
@@ -73,9 +76,19 @@ async def get_messages(
 async def get_chats_list(
     user_id: UserIdDep,
     session: SessionDep) -> GetChatsResponse:
-    chats = await select_chats(session, user_id)
+    chats = await select_chats_by_user_id(session, user_id)
 
     return GetChatsResponse(chats=chats)
+
+
+@chat_router.get("/{chat_id}")
+async def get_chat_name(
+    chat_id: int,
+    session: SessionDep) -> GetChatResponse:
+
+    chat_name = await fetch_chat_name_by_id(session, chat_id)
+
+    return GetChatResponse(chat_name=chat_name)
 
 
 @chat_router.post("/create")

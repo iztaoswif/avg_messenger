@@ -5,7 +5,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models import chats, chat_members
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 
 async def insert_chat(
@@ -17,7 +17,7 @@ async def insert_chat(
     return result.scalar_one()
 
 
-async def select_chats(
+async def select_chats_by_user_id(
     session: AsyncSession,
     user_id: int) -> List[Dict]:
 
@@ -39,6 +39,16 @@ async def select_chats(
         }
         for row in result.mappings()
     ]
+
+
+async def select_chat_name_by_id(
+    session: AsyncSession,
+    id: int) -> Optional[str]:
+
+    stmt = stmt = select(chats.c.name).where(chats.c.id == id)
+
+    result = await session.execute(stmt)
+    return result.scalar_one_or_none()
 
 
 async def is_chat_exists(

@@ -99,6 +99,10 @@ class GetChatsResponse(BaseModel):
     chats: List[Chat]
 
 
+class GetChatResponse(BaseModel):
+    chat_name: str
+
+
 class JoinChatRequest(BaseModel):
     chat_id: int = Field(ge=1)
 
