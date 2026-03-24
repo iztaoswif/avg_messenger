@@ -1,7 +1,7 @@
 """added chats and chat_members tables
 
 Revision ID: 26d6afd6d79e
-Revises: None
+Revises: 3a7db9158b6e
 Create Date: 2026-03-15 03:11:19.988408
 
 """
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = '26d6afd6d79e'
-down_revision: Union[str, Sequence[str], None] = None
+down_revision: Union[str, Sequence[str], None] = '3a7db9158b6e'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
