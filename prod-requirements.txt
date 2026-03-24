@@ -1,6 +1,6 @@
 fastapi
 sqlalchemy
-psycopg
+psycopg[binary]
 argon2-cffi
 python-jose
 python-dotenv
