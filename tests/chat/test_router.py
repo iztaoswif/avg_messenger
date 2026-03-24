@@ -78,14 +78,14 @@ async def test_creator_in_the_created_chat(
     token = await register_and_login(client)
     await create_chat(client, token)
 
-    cursor = await sqlite_connection.execute("SELECT * FROM chat_members")
-    result = await cursor.fetchone()
+    exec_result = await sqlite_connection.execute("SELECT * FROM chat_members")
+    row = await exec_result.fetchone()
 
-    assert(result is not None)
-    assert(result["user_id"] == 1)
-    assert(result["chat_id"] == 1)
+    assert row is not None
+    assert row["user_id"] == 1
+    assert row["chat_id"] == 1
 
-    assert await cursor.fetchone() is None
+    assert await exec_result.fetchone() is None
 
 
 async def test_create_chat_appears_in_list(client: AsyncClient):
@@ -100,8 +100,8 @@ async def test_create_chat_appears_in_list(client: AsyncClient):
 
     chats = response.json()["chats"]
 
-    assert(isinstance(chats, list))
-    assert(len(chats) == 1)
+    assert isinstance(chats, list)
+    assert len(chats) == 1
     assert chats[0]["name"] == "mychat"
 
 
@@ -130,15 +130,38 @@ async def test_get_messages(client: AsyncClient):
     assert messages[1]["content"] == "world"
 
 
-async def test_join_chat(client: AsyncClient):
+async def test_join_chat(
+    client: AsyncClient,
+    sqlite_connection):
+
     token1 = await register_and_login(client, "user1")
+    await create_chat(client, token1)
+
     token2 = await register_and_login(client, "user2")
 
-    chat_response = await create_chat(client, token1)
-    chat_id = chat_response.json()["id"]
-
     response = await client.post("/chat/join",
-        json={"chat_id": chat_id},
+        json={"chat_id": 1},
         headers={"Authorization": f"Bearer {token2}"}
     )
+
     assert_successful_response(response)
+
+    exec_result = await sqlite_connection.execute("SELECT * FROM chat_members")
+    temp = 0
+
+    row1 = await exec_result.fetchone()
+    assert row1 is not None
+    assert row1["user_id"] in (1, 2)
+    assert row1["chat_id"] == 1
+
+    temp += row1["user_id"]
+
+    row2 = await exec_result.fetchone()
+    assert row2 is not None
+    assert row2["user_id"] in (1, 2)
+    assert row2["chat_id"] == 1
+
+    temp += row2["user_id"]
+
+    assert temp == 3
+    assert await exec_result.fetchone() is None
