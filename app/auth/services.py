@@ -4,6 +4,7 @@ from app.repositories.users import (
     select_user_by_username,
     is_username_taken
 )
+from app.repositories.chat_members import insert_chat_member
 from app.auth.exceptions import UsernameTakenError, InvalidCredentialsError
 from app.core.passwords import get_password_hash, is_password_correct
 from app.core.token import create_access_token
@@ -18,8 +19,10 @@ async def register_user(
     if is_username_taken_result:
         raise UsernameTakenError()
 
+    ORIGIN_CHAT_ID = 1
     password_hash = await get_password_hash(password)
-    await insert_user(session, username, password_hash)
+    new_user_id = await insert_user(session, username, password_hash)
+    await insert_chat_member(session, ORIGIN_CHAT_ID, new_user_id)
 
 
 async def login_user(

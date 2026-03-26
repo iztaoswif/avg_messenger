@@ -14,6 +14,7 @@ from app.chat.schemas import (
     GetChatsResponse,
     GetChatResponse,
     JoinChatRequest,
+    AddUserRequest,
     GenericMessageResponse
 )
 from app.auth.dependencies import get_current_user_id
@@ -21,12 +22,14 @@ from app.repositories.chats import (
     select_chats_by_user_id
 )
 from app.chat.services import (
+    ensure_chat_access,
     fetch_messages,
     add_member_to_chat,
-    create_new_message,
+    create_message_in_chat,
     add_new_chat,
     fetch_chat_name_by_id
 )
+from app.chat.exceptions import SelfReferencingError
 
 SessionDep = Annotated[AsyncSession, Depends(get_asyncsession)]
 UserIdDep = Annotated[int, Depends(get_current_user_id)]
@@ -48,7 +51,9 @@ async def send_message(
     if await is_rate_limited(redis_client, f"sender_id:{sender_id}"):
         raise RateLimitedError()
 
-    await create_new_message(
+    await ensure_chat_access(session, chat_id, sender_id)
+
+    await create_message_in_chat(
         session,
         redis_client,
         sender_id,
@@ -67,7 +72,9 @@ async def get_messages(
     user_id: UserIdDep,
     session: SessionDep) -> GetMessagesResponse:
 
-    messages = await fetch_messages(session, chat_id, after_id)
+    await ensure_chat_access(session, chat_id, user_id)
+
+    messages = await fetch_messages(session, chat_id, user_id, after_id)
 
     return GetMessagesResponse(messages=messages)
 
@@ -76,6 +83,7 @@ async def get_messages(
 async def get_chats_list(
     user_id: UserIdDep,
     session: SessionDep) -> GetChatsResponse:
+
     chats = await select_chats_by_user_id(session, user_id)
 
     return GetChatsResponse(chats=chats)
@@ -109,6 +117,27 @@ async def create_chat(
     )
 
 
+@chat_router.post("/add")
+async def add_new_user(
+    request: AddUserRequest,
+    adding_user_id: UserIdDep,
+    session: SessionDep) -> GenericMessageResponse:
+
+    new_user_id, chat_id = request.new_user_id, request.chat_id
+
+    if new_user_id == adding_user_id:
+        raise SelfReferencingError()
+
+    await ensure_chat_access(session, chat_id, adding_user_id)
+
+    await add_member_to_chat(session, chat_id, new_user_id)
+
+    await session.commit()
+
+    return GenericMessageResponse(message="Successfully added new user")
+
+
+'''
 @chat_router.post("/join")
 async def join_chat(
     request: JoinChatRequest,
@@ -122,3 +151,4 @@ async def join_chat(
     await session.commit()
 
     return GenericMessageResponse(message="Successful chat join")
+'''

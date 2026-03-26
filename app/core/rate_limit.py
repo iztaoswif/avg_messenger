@@ -7,11 +7,12 @@ async def is_rate_limited(
     limit: int = 5,
     window_seconds: int = 1) -> bool:
 
-    key = "rate_limit:" + key_identifier
+    key = f"rate_limit:{key_identifier}"
 
-    current = await redis_client.incr(key)
+    async with redis_client.pipeline(transaction=True) as pipe:
+        pipe.incr(key)
+        pipe.expire(key, window_seconds)
+        results = await pipe.execute()
+        current_count = results[0]
 
-    if current == 1:
-        await redis_client.expire(key, window_seconds)
-
-    return current > limit
+    return current_count > limit

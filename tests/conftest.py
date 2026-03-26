@@ -4,6 +4,8 @@ from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from fakeredis.aioredis import FakeRedis
 
+from app.db.models import chats
+from sqlalchemy import insert
 from app.main import app
 from app.db.models import metadata
 from app.db.dependencies import get_asyncsession
@@ -55,7 +57,14 @@ async def redis():
 
 
 @pytest.fixture
-async def client(session, redis):
+async def seed_db(session: AsyncSession):
+    stmt = insert(chats).values(name="Origin")
+    await session.execute(stmt)
+    await session.commit()
+
+
+@pytest.fixture
+async def client(session, redis, seed_db):
     async def override_get_asyncsession():
         yield session
 

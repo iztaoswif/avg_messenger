@@ -1,9 +1,9 @@
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
+from app.core.exceptions import ForbiddenError
 from app.chat.exceptions import (
     InappropriateChatIdError,
-    InappropriateIdError,
     ChatNotFoundError
 )
 from app.repositories.messages import (
@@ -13,23 +13,32 @@ from app.repositories.messages import (
 from app.repositories.chats import (
     insert_chat,
     is_chat_exists,
-    is_chat_id_exists,
     select_chat_name_by_id
 )
-from app.repositories.chat_members import insert_chat_member
+from app.repositories.chat_members import (
+    insert_chat_member,
+    is_chat_member
+)
 from app.chat.exceptions import AlreadyChatMemberError
+
+
+async def ensure_chat_access(
+    session: AsyncSession,
+    chat_id: int,
+    user_id: int) -> None:
+
+    if not await is_chat_exists(session, chat_id):
+        raise ChatNotFoundError()
+
+    if not await is_chat_member(session, chat_id, user_id):
+        raise ForbiddenError()
 
 
 async def fetch_messages(
     session: AsyncSession,
     chat_id: int,
+    user_id: int,
     after_id: int = 0):
-
-    if not await is_chat_exists(session, chat_id):
-        raise InappropriateChatIdError()
-
-    if not await is_chat_id_exists(session, chat_id):
-        raise InappropriateIdError()
 
     messages = await select_messages(session, chat_id, after_id)
     return messages
@@ -59,7 +68,7 @@ async def add_new_chat(
     return new_chat_id
 
 
-async def create_new_message(
+async def create_message_in_chat(
     session: AsyncSession,
     redis_client: Redis,
     sender_id: int,
@@ -84,4 +93,3 @@ async def fetch_chat_name_by_id(
         raise ChatNotFoundError()
 
     return chat_name
-

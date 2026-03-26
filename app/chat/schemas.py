@@ -109,3 +109,8 @@ class JoinChatRequest(BaseModel):
 
 class GenericMessageResponse(BaseModel):
     message: str
+
+
+class AddUserRequest(BaseModel):
+    new_user_id: int = Field(ge=1)
+    chat_id: int = Field(ge=1)

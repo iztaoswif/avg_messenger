@@ -53,16 +53,6 @@ async def select_chat_name_by_id(
 
 async def is_chat_exists(
     session: AsyncSession,
-    chat_id: int) -> bool:
-
-    stmt = select(exists().where(chats.c.id == chat_id))
-
-    result = await session.execute(stmt)
-    return result.scalar()
-
-
-async def is_chat_id_exists(
-    session: AsyncSession,
     id: int) -> bool:
 
     stmt = select(exists().where(chats.c.id == id))

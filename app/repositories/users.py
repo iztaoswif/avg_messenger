@@ -21,14 +21,15 @@ async def is_username_taken(
 async def insert_user(
     session: AsyncSession,
     username: str,
-    password_hash: str) -> None:
+    password_hash: str) -> int:
 
     stmt = insert(users).values(
         username=username,
         password_hash=password_hash
-    )
+    ).returning(users.c.id)
 
-    await session.execute(stmt)
+    id = await session.execute(stmt)
+    return id.scalar()
 
 
 async def select_user_by_username(

@@ -3,6 +3,9 @@ from sqlalchemy import (
     select,
     exists
 )
+
+from app.chat.exceptions import AlreadyChatMemberError
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models import chat_members
 
@@ -12,12 +15,16 @@ async def insert_chat_member(
     chat_id: int,
     user_id: int) -> None:
 
-    stmt = insert(chat_members).values(
-        chat_id=chat_id,
-        user_id=user_id
-    )
+    try:
+        stmt = insert(chat_members).values(
+            chat_id=chat_id,
+            user_id=user_id
+        )
 
-    await session.execute(stmt)
+        await session.execute(stmt)
+    
+    except IntegrityError:
+        raise AlreadyChatMemberError()
 
 
 async def is_chat_member(

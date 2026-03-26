@@ -26,11 +26,6 @@ class InappropriateChatIdError(ChatException):
     detail = "Inappropriate chat id"
 
 
-class InappropriateIdError(ChatException):
-    status_code: int = 422
-    detail = "Inappropriate id"
-
-
 class AlreadyChatMemberError(ChatException):
     status_code: int = 409
     detail = "The user is already a member of the given chat"
@@ -39,3 +34,8 @@ class AlreadyChatMemberError(ChatException):
 class ChatNotFoundError(ChatException):
     status_code: int = 404
     detail = "Chat not found"
+
+
+class SelfReferencingError(ChatException):
+    status_code: int = 422
+    detail = "You can not choose yourself"

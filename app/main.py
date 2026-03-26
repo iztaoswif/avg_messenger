@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from redis.asyncio import Redis
+from app.core.redis import create_redis_client
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,7 +11,9 @@ from app.chat.router import chat_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    app.state.redis = create_redis_client()
     yield
+    await app.state.redis.aclose()
 
 app = FastAPI(lifespan=lifespan)
 
