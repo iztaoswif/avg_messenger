@@ -62,6 +62,12 @@ app.include_router(chat_router)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+
+@app.get("/health", include_in_schema=False)
+async def health_check():
+    return {"status": "ok"}
+
+
 @app.get("/")
 async def root():
     return RedirectResponse(url="/static/index.html")
