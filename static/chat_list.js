@@ -2,7 +2,7 @@ const token = localStorage.getItem("access_token");
 
 if (!token) {
     alert("You must log in first!");
-    window.location.href = "auth.html";
+    window.location.href = "index.html";
 }
 
 

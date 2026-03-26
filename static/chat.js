@@ -3,7 +3,7 @@ console.log(token);
 
 if (!token) {
     alert("You must log in first!");
-    window.location.href = "auth.html";
+    window.location.href = "index.html";
 }
 
 document.getElementById('backToChatsBtn').onclick = () => {
@@ -97,7 +97,7 @@ document.getElementById('meBtn').onclick = async () => {
             alert(`Error: ${data.detail || "Could not retrieve user info"}`);
             
             if (res.status === 401) {
-                window.location.href = "auth.html";
+                window.location.href = "index.html";
             }
             return;
         }
@@ -148,7 +148,7 @@ async function fetchMessages() {
     if (!res.ok) {
         console.error("Fetch failed", res.status);
         alert("An error occured! Please re-login");
-        window.location.href = "auth.html";
+        window.location.href = "index.html";
     }
 
     const data = await res.json();
