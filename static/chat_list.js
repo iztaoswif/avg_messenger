@@ -5,6 +5,7 @@ if (!token) {
     window.location.href = "auth.html";
 }
 
+
 async function fetchChats() {
     const contentDiv = document.getElementById('content');
 
@@ -46,8 +47,47 @@ async function fetchChats() {
 
     } catch (err) {
         contentDiv.innerHTML = `<p class="error">Error: ${err.message}</p>`;
-        console.error(err);
+        console.error("Fetch Error:", err);
     }
 }
 
-window.addEventListener('DOMContentLoaded', fetchChats);
+
+window.addEventListener('DOMContentLoaded', () => {
+    fetchChats();
+
+    const createBtn = document.getElementById('createChatBtn');
+    if (createBtn) {
+        createBtn.onclick = async () => {
+            const chatName = window.prompt("Enter a name for your new chat:");
+
+            if (!chatName || chatName.trim() === "") return;
+
+            try {
+                const res = await fetch("/chat/create", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ name: chatName.trim() })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    alert(`Could not create chat: ${data.detail || "Unknown error"}`);
+                    return;
+                }
+
+                console.log("Success: Chat created", data);
+                
+                await fetchChats();
+
+            } catch (err) {
+                alert(`Network error: ${err.message}`);
+            }
+        };
+    } else {
+        console.warn("Element 'createChatBtn' not found in HTML.");
+    }
+});

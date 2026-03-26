@@ -43,6 +43,73 @@ async function fetchChatName() {
 fetchChatName();
 
 
+document.getElementById('addUserBtn').onclick = async () => {
+    const newUserId = window.prompt("Enter the User ID of the person you want to add:");
+
+    if (!newUserId || newUserId.trim() === "") return;
+
+    const userIdInt = parseInt(newUserId);
+    if (isNaN(userIdInt)) {
+        alert("Please enter a valid numeric User ID.");
+        return;
+    }
+
+    try {
+        const res = await fetch("/chat/add", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ 
+                chat_id: parseInt(chatId), 
+                new_user_id: userIdInt 
+            })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            alert(`Failed to add user: ${data.detail || "Unknown error"}`);
+            return;
+        }
+
+        alert(data.message);
+
+    } catch (err) {
+        alert(`Network error: ${err.message}`);
+    }
+};
+
+
+document.getElementById('meBtn').onclick = async () => {
+    try {
+        const res = await fetch("/auth/me", {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            alert(`Error: ${data.detail || "Could not retrieve user info"}`);
+            
+            if (res.status === 401) {
+                window.location.href = "auth.html";
+            }
+            return;
+        }
+
+        alert(`Your User ID is: ${data.user_id}`);
+
+    } catch (err) {
+        alert(`Network error: ${err.message}`);
+    }
+};
+
+
 let lastMessageId = 0;
 
 document.getElementById('chatForm').onsubmit = async (e) => {
@@ -80,7 +147,8 @@ async function fetchMessages() {
 
     if (!res.ok) {
         console.error("Fetch failed", res.status);
-        return;
+        alert("An error occured! Please re-login");
+        window.location.href = "auth.html";
     }
 
     const data = await res.json();

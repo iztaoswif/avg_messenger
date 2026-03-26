@@ -3,9 +3,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 from app.core.exceptions import ForbiddenError
 from app.chat.exceptions import (
-    InappropriateChatIdError,
     ChatNotFoundError
 )
+from app.auth.exceptions import UserNotFoundError
 from app.repositories.messages import (
     select_messages,
     insert_message
@@ -19,6 +19,7 @@ from app.repositories.chat_members import (
     insert_chat_member,
     is_chat_member
 )
+from app.repositories.users import is_user_exists
 from app.chat.exceptions import AlreadyChatMemberError
 
 
@@ -32,6 +33,14 @@ async def ensure_chat_access(
 
     if not await is_chat_member(session, chat_id, user_id):
         raise ForbiddenError()
+
+
+async def ensure_user_exists(
+    session: AsyncSession,
+    user_id: int) -> None:
+
+    if not await is_user_exists(session, user_id):
+        raise UserNotFoundError()
 
 
 async def fetch_messages(

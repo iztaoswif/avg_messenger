@@ -79,3 +79,7 @@ class LoginRequest(BaseModel):
     def validate_password_login(cls,password: str) -> str:
         password = validate_password(password)
         return password
+
+
+class GetMeResponse(BaseModel):
+    user_id: int

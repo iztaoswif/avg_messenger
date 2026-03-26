@@ -50,3 +50,13 @@ async def select_user_by_id(
 
     result = await session.execute(stmt)
     return result.mappings().first()
+
+
+async def is_user_exists(
+    session: AsyncSession,
+    id: int) -> bool:
+
+    stmt = select(exists().where(users.c.id == id))
+
+    result = await session.execute(stmt)
+    return result.scalar()

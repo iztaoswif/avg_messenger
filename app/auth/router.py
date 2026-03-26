@@ -6,11 +6,15 @@ from app.core.rate_limit import is_rate_limited
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.dependencies import get_asyncsession
-from app.auth.schemas import (MessageResponse,
-TokenResponse,
-RegisterRequest)
+from app.auth.schemas import (
+    MessageResponse,
+    TokenResponse,
+    RegisterRequest,
+    GetMeResponse
+)
 
 from app.auth.services import register_user, login_user
+from app.auth.dependencies import get_current_user_id
 
 
 auth_router = APIRouter(prefix="/auth",
@@ -49,3 +53,10 @@ async def login(
     token = await login_user(session, username, password)
 
     return TokenResponse(access_token=token)
+
+
+@auth_router.get("/me")
+async def me(
+    user_id: int = Depends(get_current_user_id)) -> GetMeResponse:
+
+    return GetMeResponse(user_id=user_id)

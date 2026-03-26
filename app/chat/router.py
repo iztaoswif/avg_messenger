@@ -23,6 +23,7 @@ from app.repositories.chats import (
 )
 from app.chat.services import (
     ensure_chat_access,
+    ensure_user_exists,
     fetch_messages,
     add_member_to_chat,
     create_message_in_chat,
@@ -127,6 +128,8 @@ async def add_new_user(
 
     if new_user_id == adding_user_id:
         raise SelfReferencingError()
+
+    await ensure_user_exists(session, new_user_id)
 
     await ensure_chat_access(session, chat_id, adding_user_id)
 

@@ -49,3 +49,8 @@ class InvalidTokenError(AuthException):
 class ForbiddenError(AuthException):
     status_code = 403
     detail = "Forbidden"
+
+
+class UserNotFoundError(AuthException):
+    status_code = 404
+    detail = "User with given id does not exist"
