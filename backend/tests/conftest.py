@@ -2,21 +2,19 @@ import pytest
 import sqlite3
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncConnection
-from fakeredis.aioredis import FakeRedis
 
-from app.db.models import chats
+from db.models import chats
 from sqlalchemy import insert
-from app.main import app
-from app.db.models import metadata
-from app.db.dependencies import get_asyncsession
-from app.core.dependencies import get_redis
+from main import app
+from db.models import metadata
+from db.dependencies import get_async_connection
 
 TEST_DATABASE_URL = "sqlite+aiosqlite:///tests/test.db"
 
 test_engine = create_async_engine(TEST_DATABASE_URL)
 
 
-@pytest.fixture(scope="conn", autouse=True)
+@pytest.fixture(autouse=True)
 async def create_delete_tables():
     async with test_engine.begin() as conn:
         await conn.run_sync(metadata.create_all)
@@ -39,40 +37,11 @@ async def db_connection():
 
 
 @pytest.fixture
-async def conn(db_connection):
-    async with AsyncConnection(bind=db_connection, expire_on_commit=False) as s:
-        yield s
-
-
-@pytest.fixture
-async def sqlite_connection(db_connection):
-    raw_conn = await db_connection.get_raw_connection()
-    return raw_conn.driver_connection
-
-
-@pytest.fixture
-async def redis():
-    async with FakeRedis(decode_responses=True) as r:
-        yield r
-
-
-@pytest.fixture
-async def seed_db(conn: AsyncConnection):
-    stmt = insert(chats).values(name="Origin")
-    await conn.execute(stmt)
-    await conn.commit()
-
-
-@pytest.fixture
-async def client(conn, redis, seed_db):
-    async def override_get_asyncsession():
+async def client(conn: AsyncConnection):
+    async def override_get_async_connection():
         yield conn
 
-    async def override_get_redis():
-        yield redis
-
-    app.dependency_overrides[get_asyncsession] = override_get_asyncsession
-    app.dependency_overrides[get_redis] = override_get_redis
+    app.dependency_overrides[get_async_connection] = override_get_async_connection
 
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
         yield c
