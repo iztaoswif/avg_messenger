@@ -1,4 +1,7 @@
 services:
+  reverse_proxy:
+    image: nginx:latest
+
   app:
     build: .
     ports:

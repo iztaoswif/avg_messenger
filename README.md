@@ -1,6 +1,5 @@
 Asynchronous REST API messenger made using FastAPI
 
-
 Stack:
 -Python 3.12
 -FastAPI
@@ -10,7 +9,6 @@ Stack:
 -JWT (python-jose)
 -Docker / Docker compose
 
-
 Features:
 -JWT authentication (register / login)
 -Message sending
@@ -18,7 +16,6 @@ Features:
 -Asynchronous interactions with DB
 -Isolation of tests using transactions
 -Containerizing the app using Docker
-
 
 Architecture:
 app/
@@ -29,7 +26,6 @@ app/
     -db (database schemas, engine, async session generator)
 basic flow: router -> schemas (validation) -> service -> repository -> database
 
-
 JWT access tokens store user_id in the "sub" field,
 their validity and expiration date is being checked.
 
@@ -38,7 +34,6 @@ switching to SQLAlchemy ORM is considered in the future.
 
 For tests the pytest, pytest-asyncio and httpx AsyncClient +  ASGITransport are used.
 Tests are isolated using database transactions.
-
 
 #TODO
 -Websockets support

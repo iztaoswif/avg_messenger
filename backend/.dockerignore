@@ -1,0 +1,13 @@
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+tests/
+.venv/
+*.pyc
+.env
+.git
+.gitignore
+.python-version
+README.md
+test-requirements.txt
+*.sql
