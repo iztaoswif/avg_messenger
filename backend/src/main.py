@@ -1,41 +1,22 @@
 import os
-from contextlib import asynccontextmanager
-from fastapi import APIRouter, FastAPI, Request, HTTPException
+from fastapi import APIRouter, FastAPI, Request
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-
-import redis.asyncio
 
 from auth.router import auth_router
 from chat.router import chat_router
 from core.exceptions import AppException
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    redis_url = os.environ["REDIS_URL"]
-    redis_client = redis.asyncio.from_url(
-        redis_url,
-        decode_responses=True,
-        max_connections=30
-    )
-    
-    app.state.redis = redis_client
-    yield
-    await app.state.redis.aclose()
-
 
 if os.environ["APP_ENV"] == "prod":
     app = FastAPI(
-        lifespan=lifespan,
         docs_url=None, 
         redoc_url=None,
         openapi_url=None
     )
 else:
-    app = FastAPI(
-        lifespan=lifespan
-    )
+    app = FastAPI()
 
 
 @app.exception_handler(AppException)
