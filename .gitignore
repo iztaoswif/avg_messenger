@@ -1,4 +1,4 @@
-# Python-generated files
+# Backend stuff
 __pycache__/
 *.py[oc]
 build/
@@ -13,7 +13,32 @@ test_data.txt
 *.sql
 test.db
 
-# Virtual environments
+
+# Frontend stuff
+
+dist
+.wrangler
+.output
+.vercel
+.netlify
+.vinxi
+app.config.timestamp_*.js
+
+/node_modules
+
+/.idea
+.project
+.classpath
+*.launch
+.settings/
+
+.DS_Store
+Thumbs.db
+
+
+# Shared stuff
+
 .venv
 .env
 .env.docker
+.env*.local
