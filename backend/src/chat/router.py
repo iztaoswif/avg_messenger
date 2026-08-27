@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from typing import Annotated
 from sqlalchemy.ext.asyncio import AsyncConnection
+from core.helper_types import UserId
 from db.dependencies import get_asyncsession
 from chat.schemas import (
     SendTextMessageRequest,
@@ -29,7 +30,7 @@ from chat.services import (
 from chat.exceptions import SelfReferencingError
 
 SessionDep = Annotated[AsyncConnection, Depends(get_asyncsession)]
-UserIdDep = Annotated[int, Depends(get_current_user_id)]
+UserIdDep = Annotated[UserId, Depends(get_current_user_id)]
 
 chat_router = APIRouter(prefix="/chat",
 tags=["Chat"])
@@ -53,7 +54,7 @@ async def send_message(
     return GenericMessageResponse(message="Message sent successfully")
 
 
-@chat_router.get("/messages")
+@chat_router.get("/messages/{after}")
 async def get_messages(
     chat_id: int,
     after_id: int,
@@ -106,14 +107,10 @@ async def add_new_user(
     adding_user_id: UserIdDep,
     conn: SessionDep
 ) -> GenericMessageResponse:
-
-    new_user_id, chat_id = request.new_user_id, request.chat_id
-
-    if new_user_id == adding_user_id:
+    if request.new_user_id == adding_user_id:
         raise SelfReferencingError()
 
-    await add_member_to_chat(conn, chat_id, new_user_id)
-
+    await add_member_to_chat(conn, request.chat_id, request.new_user_id)
 
     return GenericMessageResponse(message="Successfully added new user")
 

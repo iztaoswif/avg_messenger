@@ -4,6 +4,8 @@ from jose import jwt, JWTError, ExpiredSignatureError
 from auth.exceptions import InvalidTokenError, TokenExpiredError
 from datetime import datetime, timedelta, timezone
 
+from core.helper_types import UserId
+
 load_dotenv()
 
 SECRET_KEY = os.environ["JWT_SECRET_KEY"]
@@ -12,11 +14,13 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 20
 
 
 def create_access_token(
-    data: dict
+    user_id: UserId
 ) -> str:
-    to_encode = data.copy()
     expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({"exp": expire})
+    to_encode = {
+        "sub": str(user_id),
+        "exp": expire
+    }
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 

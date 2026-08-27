@@ -14,7 +14,7 @@ async def register_user(
     password: str
 ) -> None:
     password_hash = await calculate_password_hash(password)
-    new_user_id = await insert_user(conn, username, password_hash)
+    await insert_user(conn, username, password_hash)
 
 
 async def login_user(
@@ -26,5 +26,5 @@ async def login_user(
     if user_id is None:
         raise InvalidCredentialsError()
 
-    token = create_access_token({"sub": str(user_id)})
+    token = create_access_token(user_id)
     return token
