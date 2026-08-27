@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from typing import Annotated
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncConnection
 from db.dependencies import get_asyncsession
 from chat.schemas import (
     SendTextMessageRequest,
@@ -28,7 +28,7 @@ from chat.services import (
 )
 from chat.exceptions import SelfReferencingError
 
-SessionDep = Annotated[AsyncSession, Depends(get_asyncsession)]
+SessionDep = Annotated[AsyncConnection, Depends(get_asyncsession)]
 UserIdDep = Annotated[int, Depends(get_current_user_id)]
 
 chat_router = APIRouter(prefix="/chat",
@@ -39,12 +39,12 @@ tags=["Chat"])
 async def send_message(
     request: SendTextMessageRequest,
     sender_id: UserIdDep,
-    session: SessionDep,
+    conn: SessionDep,
 ) -> GenericMessageResponse:
-    await ensure_chat_access(session, request.chat_id, sender_id)
+    await ensure_chat_access(conn, request.chat_id, sender_id)
 
     await create_message_in_chat(
-        session,
+        conn,
         sender_id,
         request.chat_id,
         request.content
@@ -58,10 +58,10 @@ async def get_messages(
     chat_id: int,
     after_id: int,
     user_id: UserIdDep,
-    session: SessionDep
+    conn: SessionDep
 ) -> GetMessagesResponse:
-    await ensure_chat_access(session, chat_id, user_id)
-    messages = await fetch_messages(session, chat_id, after_id)
+    await ensure_chat_access(conn, chat_id, user_id)
+    messages = await fetch_messages(conn, chat_id, after_id)
 
     return GetMessagesResponse(messages=messages)
 
@@ -69,9 +69,9 @@ async def get_messages(
 @chat_router.get("/list")
 async def get_chats_list(
     user_id: UserIdDep,
-    session: SessionDep
+    conn: SessionDep
 ) -> GetChatsResponse:
-    chats = await select_chats_of_user(session, user_id)
+    chats = await select_chats_of_user(conn, user_id)
 
     return GetChatsResponse(chats=chats)
 
@@ -79,9 +79,9 @@ async def get_chats_list(
 @chat_router.get("/{chat_id}")
 async def get_chat_name(
     chat_id: int,
-    session: SessionDep
+    conn: SessionDep
 ) -> GetChatResponse:
-    chat_name = await fetch_chat_name_by_id(session, chat_id)
+    chat_name = await fetch_chat_name_by_id(conn, chat_id)
 
     return GetChatResponse(chat_name=chat_name)
 
@@ -90,9 +90,9 @@ async def get_chat_name(
 async def create_chat(
     request: CreateChatRequest,
     creator_id: UserIdDep,
-    session: SessionDep
+    conn: SessionDep
 ) -> CreateChatResponse:
-    new_chat_id = await add_new_chat(session, request.name, creator_id)
+    new_chat_id = await add_new_chat(conn, request.name, creator_id)
 
     return CreateChatResponse(
         id=new_chat_id,
@@ -104,7 +104,7 @@ async def create_chat(
 async def add_new_user(
     request: AddUserRequest,
     adding_user_id: UserIdDep,
-    session: SessionDep
+    conn: SessionDep
 ) -> GenericMessageResponse:
 
     new_user_id, chat_id = request.new_user_id, request.chat_id
@@ -112,7 +112,7 @@ async def add_new_user(
     if new_user_id == adding_user_id:
         raise SelfReferencingError()
 
-    await add_member_to_chat(session, chat_id, new_user_id)
+    await add_member_to_chat(conn, chat_id, new_user_id)
 
 
     return GenericMessageResponse(message="Successfully added new user")
@@ -123,13 +123,11 @@ async def add_new_user(
 async def join_chat(
     request: JoinChatRequest,
     user_id: UserIdDep,
-    session: SessionDep) -> GenericMessageResponse:
+    conn: SessionDep) -> GenericMessageResponse:
 
     chat_id = request.chat_id
 
-    await add_member_to_chat(session, chat_id, user_id)
-
-    await session.commit()
+    await add_member_to_chat(conn, chat_id, user_id)
 
     return GenericMessageResponse(message="Successful chat join")
 '''

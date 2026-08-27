@@ -2,14 +2,14 @@ from sqlalchemy import (
     insert,
     select
 )
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncConnection
 from core.dto import Chat
 from core.helper_types import ChatId, UserId
 from db.models import chats, chat_members
 
 
 async def insert_chat(
-    session: AsyncSession,
+    conn: AsyncConnection,
     name: str,
     creator_id: UserId
 ) -> ChatId:
@@ -20,12 +20,12 @@ async def insert_chat(
             creator_id=creator_id
         )
         .returning(chats.c.id))
-    result = await session.execute(stmt)
+    result = await conn.execute(stmt)
     return result.scalar_one()
 
 
 async def select_chats_of_user(
-    session: AsyncSession,
+    conn: AsyncConnection,
     user_id: UserId
 ) -> list[Chat]:
     stmt = (
@@ -38,7 +38,7 @@ async def select_chats_of_user(
         .order_by(chats.c.id.asc())
     )
 
-    result = await session.execute(stmt)
+    result = await conn.execute(stmt)
 
     return [
         Chat(
@@ -50,7 +50,7 @@ async def select_chats_of_user(
 
 
 async def select_chat(
-    session: AsyncSession,
+    conn: AsyncConnection,
     id: ChatId
 ) -> Chat | None:
     stmt = (
@@ -58,7 +58,7 @@ async def select_chat(
         .where(chats.c.id == id)
     )
 
-    name = (await session.execute(stmt)).scalar_one_or_none()
+    name = (await conn.execute(stmt)).scalar_one_or_none()
 
     if name is None: return None
 

@@ -1,7 +1,7 @@
 import pytest
 import sqlite3
 from httpx import AsyncClient, ASGITransport
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncConnection
 from fakeredis.aioredis import FakeRedis
 
 from app.db.models import chats
@@ -16,7 +16,7 @@ TEST_DATABASE_URL = "sqlite+aiosqlite:///tests/test.db"
 test_engine = create_async_engine(TEST_DATABASE_URL)
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="conn", autouse=True)
 async def create_delete_tables():
     async with test_engine.begin() as conn:
         await conn.run_sync(metadata.create_all)
@@ -39,8 +39,8 @@ async def db_connection():
 
 
 @pytest.fixture
-async def session(db_connection):
-    async with AsyncSession(bind=db_connection, expire_on_commit=False) as s:
+async def conn(db_connection):
+    async with AsyncConnection(bind=db_connection, expire_on_commit=False) as s:
         yield s
 
 
@@ -57,16 +57,16 @@ async def redis():
 
 
 @pytest.fixture
-async def seed_db(session: AsyncSession):
+async def seed_db(conn: AsyncConnection):
     stmt = insert(chats).values(name="Origin")
-    await session.execute(stmt)
-    await session.commit()
+    await conn.execute(stmt)
+    await conn.commit()
 
 
 @pytest.fixture
-async def client(session, redis, seed_db):
+async def client(conn, redis, seed_db):
     async def override_get_asyncsession():
-        yield session
+        yield conn
 
     async def override_get_redis():
         yield redis

@@ -2,14 +2,14 @@ from sqlalchemy import (
     insert,
     select,
 )
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncConnection
 from core.dto import Message
 from core.helper_types import ChatId, MessageId, UserId
 from db.models import messages
 
 
 async def insert_message(
-    session: AsyncSession,
+    conn: AsyncConnection,
     sender_id: UserId,
     chat_id: ChatId,
     content: str
@@ -23,12 +23,12 @@ async def insert_message(
         )
         .returning(messages.c.id)
     )
-    result = await session.execute(stmt)
+    result = await conn.execute(stmt)
     return result.scalar_one()
 
 
 async def select_messages_after(
-    session: AsyncSession,
+    conn: AsyncConnection,
     chat_id: ChatId,
     after_id: MessageId | None
 ) -> list[Message]:
@@ -43,7 +43,7 @@ async def select_messages_after(
         .order_by(messages.c.created_at.asc())
     )
 
-    result = await session.execute(base_stmt)
+    result = await conn.execute(base_stmt)
     return [
         Message(
             id=row.id,

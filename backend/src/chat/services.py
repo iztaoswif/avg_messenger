@@ -1,5 +1,5 @@
 from redis.asyncio import Redis
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncConnection
 from sqlalchemy.exc import IntegrityError
 from core.dto import Message
 from core.exceptions import ForbiddenError
@@ -27,35 +27,35 @@ from core.helper_types import ChatId, MessageId, UserId
 
 
 async def fetch_messages(
-    session: AsyncSession,
+    conn: AsyncConnection,
     chat_id: ChatId,
     after_id: MessageId | None
 ) -> list[Message]:
-    messages = await select_messages_after(session, chat_id, after_id)
+    messages = await select_messages_after(conn, chat_id, after_id)
     return messages
 
 
 async def add_member_to_chat(
-    session: AsyncSession,
+    conn: AsyncConnection,
     chat_id: ChatId,
     user_id: UserId
 ) -> None:
     try:
-        await insert_chat_member(session, chat_id, user_id)
+        await insert_chat_member(conn, chat_id, user_id)
 
     except IntegrityError as e:
-        await session.rollback()
+        await conn.rollback()
         print(e)
         raise NotImplementedError()
 
 
 async def add_new_chat(
-    session: AsyncSession,
+    conn: AsyncConnection,
     name: str,
     creator_id: UserId
 ) -> ChatId:
     try:
-        new_chat_id = await insert_chat(session, name, creator_id)
+        new_chat_id = await insert_chat(conn, name, creator_id)
     
     # ONLY TIME FOREIGN KEY CONSTRAINT CAN BE VIOLATED IS IF CREATOR DOES NOT ACTUALLY EXISTS
     except IntegrityError:
@@ -64,13 +64,13 @@ async def add_new_chat(
 
 
 async def create_message_in_chat(
-    session: AsyncSession,
+    conn: AsyncConnection,
     sender_id: UserId,
     chat_id: ChatId,
     content: str
 ) -> None:
     await insert_message(
-        session,
+        conn,
         sender_id,
         chat_id,
         content
@@ -78,10 +78,10 @@ async def create_message_in_chat(
 
 
 async def fetch_chat_name(
-    session: AsyncSession,
+    conn: AsyncConnection,
     id: ChatId
 ) -> str:
-    chat = await select_chat(session, id)
+    chat = await select_chat(conn, id)
 
     if chat is None:
         raise ChatNotFoundError()

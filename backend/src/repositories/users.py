@@ -1,31 +1,18 @@
 from sqlalchemy import (
     insert,
     select,
-    exists
 )
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncConnection
+from auth.exceptions import UsernameTakenError
 from core.dto import User
 from core.helper_types import UserId
+from core.passwords import is_password_correct
 from db.models import users
 
 
-# JUST FOR UX PURPOSES
-async def is_username_taken(
-    session: AsyncSession,
-    username: str
-) -> bool:
-    stmt = (
-        select(
-            exists()
-            .where(users.c.username == username)
-        )
-    )
-    result = await session.execute(stmt)
-    return result.scalar_one()
-
-
 async def insert_user(
-    session: AsyncSession,
+    conn: AsyncConnection,
     username: str,
     password_hash: str
 ) -> UserId:
@@ -37,13 +24,16 @@ async def insert_user(
         )
         .returning(users.c.id)
     )
+    try:
+        result = await conn.execute(stmt)
+    except IntegrityError:
+        raise UsernameTakenError
 
-    result = await session.execute(stmt)
     return result.scalar_one()
 
 
 async def select_user(
-    session: AsyncSession,
+    conn: AsyncConnection,
     id: UserId
 ) -> User | None:
     stmt = (
@@ -51,7 +41,7 @@ async def select_user(
         .where(users.c.id == id)
     )
 
-    result = await session.execute(stmt)
+    result = await conn.execute(stmt)
     user_row = result.mappings().first()
 
     if user_row is None: return None
@@ -60,3 +50,22 @@ async def select_user(
         id=user_row.id,
         username=user_row.username
     )
+
+
+async def select_user_id_by_credentials(
+    conn: AsyncConnection,
+    username: str,
+    password: str
+) -> UserId | None:
+    stmt = (
+        select(users)
+        .where(users.c.username == username)
+    )
+
+    result = await conn.execute(stmt)
+    user_row = result.mappings().first()
+
+    if user_row is None: return None
+    if not is_password_correct(user_row.password_hash, password): return None
+
+    return user_row.id

@@ -4,7 +4,7 @@ from argon2 import PasswordHasher
 ph = PasswordHasher()
 
 
-async def get_password_hash(password: str) -> str:
+async def calculate_password_hash(password: str) -> str:
     return await asyncio.to_thread(ph.hash, password)
 
 

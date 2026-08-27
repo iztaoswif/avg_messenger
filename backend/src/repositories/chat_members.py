@@ -26,5 +26,6 @@ async def insert_chat_member(
 
     try:
         await conn.execute(stmt)
+    #TODO: ANALYZE WHAT ARE THE POSSIBLE ERRORS HERE
     except IntegrityError as e:
         print(e)

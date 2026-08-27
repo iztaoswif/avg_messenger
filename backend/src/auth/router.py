@@ -31,7 +31,7 @@ async def register(
 @auth_router.post("/login")
 async def login(
     form: OAuth2PasswordRequestForm = Depends(),
-    conn: AsyncConnection = Depends(get_AsyncConnection),
+    conn: AsyncConnection = Depends(get_async_connection),
 ) -> TokenResponse:
     token = await login_user(conn, form.username, form.password)
 
